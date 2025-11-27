@@ -7,9 +7,7 @@
 
 - POST /notes → create a new note
 
-- DELETE /notes/:id → delete a note
-
-- Store notes in memory (no database yet)
+- DELETE /notes?id= → delete a note
 
 ### Skills
 
@@ -23,4 +21,9 @@
 
 - Error handling
 
-- Using Postman or curl to test endpoints
+- Using curl to test endpoints
+
+## ToDo
+- Implement data persistence (SQLite)
+- Add user authentication
+- Implement update note functionality (PUT /notes?id=)
