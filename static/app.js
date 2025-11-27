@@ -5,20 +5,27 @@ window.addEventListener("DOMContentLoaded", () => {
 
 async function loadNotes() {
   const response = await fetch("/notes");
-
   if (!response.ok) {
     console.error("failed to fetch notes");
     return;
   }
+
   const notes = await response.json();
-
   const list = document.getElementById("notes-list");
-
   list.innerHTML = "";
 
   notes.forEach((note) => {
     const li = document.createElement("li");
-    li.textContent = `(${note.id}) ${note.author}:  ${note.text}`;
+
+    const textSpan = document.createElement("span");
+    textSpan.textContent = `(${note.id}) ${note.author}:  ${note.text}			`;
+    const deleteButton = document.createElement("button");
+    deleteButton.textContent = "Delete";
+    deleteButton.addEventListener("click", async () => {
+      await deleteNote(note.id);
+    });
+    li.appendChild(textSpan);
+    li.appendChild(deleteButton);
     list.appendChild(li);
   });
 }
@@ -37,6 +44,7 @@ async function createNote(author, text) {
     console.error("Failed to create note");
     return;
   }
+  loadNotes();
 }
 
 async function setupForm() {
@@ -57,4 +65,16 @@ async function setupForm() {
     authorInput.value = "";
     textInput.value = "";
   });
+}
+
+async function deleteNote(id) {
+  const response = await fetch("/notes?id=" + encodeURIComponent(id), {
+    method: "DELETE",
+  });
+
+  if (!response.ok) {
+    console.error("Failed to delete note");
+  }
+
+  loadNotes();
 }
