@@ -74,6 +74,7 @@ async function deleteNote(id) {
 
   if (!response.ok) {
     console.error("Failed to delete note");
+		return
   }
 
   loadNotes();
