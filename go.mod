@@ -1,3 +1,3 @@
-module github.com/De-spunker11/simple-notes-API
+module github.com/RubenSi-Dev/simple-notes-API
 
 go 1.22.2

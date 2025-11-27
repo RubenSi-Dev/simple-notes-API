@@ -1,5 +1,6 @@
 window.addEventListener("DOMContentLoaded", () => {
   loadNotes();
+  setupForm();
 });
 
 async function loadNotes() {
@@ -15,9 +16,45 @@ async function loadNotes() {
 
   list.innerHTML = "";
 
-  notes.forEach(note => {
+  notes.forEach((note) => {
     const li = document.createElement("li");
-    li.textContent = `${note.id}: [${note.author}		${note.text}]`;
+    li.textContent = `(${note.id}) ${note.author}:  ${note.text}`;
     list.appendChild(li);
+  });
+}
+
+async function createNote(author, text) {
+  const response = await fetch("/notes", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ author, text }),
+  });
+  console.log(author, text);
+
+  if (!response.ok) {
+    console.error("Failed to create note");
+    return;
+  }
+}
+
+async function setupForm() {
+  const form = document.getElementById("note-form");
+  const authorInput = document.getElementById("author-input");
+  const textInput = document.getElementById("text-input");
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const author = authorInput.value.trim();
+    const text = textInput.value.trim();
+
+    if (!author || !text) {
+      return;
+    }
+    await createNote(author, text);
+
+    authorInput.value = "";
+    textInput.value = "";
   });
 }
