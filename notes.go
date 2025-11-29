@@ -63,10 +63,14 @@ func handleNotes(w http.ResponseWriter, r *http.Request) {
 	case http.MethodDelete: // DELETE
 		handleNotesDelete(w, r)
 
+	case http.MethodPut: // PUT
+		handleNotesPut(w, r)	
+
 	default:
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 	}
 }
+
 
 func handleNotesGet(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -107,4 +111,8 @@ func handleNotesDelete(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusNoContent)
 	json.NewEncoder(w).Encode(deleted)
+}
+
+func handleNotesPut(w http.ResponseWriter, r *http.Request) {
+	panic("unimplemented")
 }

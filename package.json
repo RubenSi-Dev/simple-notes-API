@@ -1,0 +1,27 @@
+{
+  "name": "simple-notes-api",
+  "version": "1.0.0",
+  "description": "- GET /notes → returns a list of notes",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "esbuild frontend/main.ts --bundle --outfile=static/app.js --sourcemap",
+    "watch": "esbuild frontend/main.ts --bundle --outfile=static/app.js --sourcemap --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/De-spunker11/simple-notes-API.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/De-spunker11/simple-notes-API/issues"
+  },
+  "homepage": "https://github.com/De-spunker11/simple-notes-API#readme",
+  "devDependencies": {
+    "esbuild": "0.27.0",
+    "typescript": "5.9.3"
+  }
+}
