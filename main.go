@@ -4,7 +4,6 @@ import (
 	"net/http"
 )
 
-
 func main() {
 	http.HandleFunc("/healthz", handleHealth)
 	http.HandleFunc("/notes", handleNotes)

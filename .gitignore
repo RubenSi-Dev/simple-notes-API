@@ -5,8 +5,8 @@ yarn-debug.log
 yarn-error.log
 
 # Compiled JS
-static/app.js
-static/app.js.map
+./static/app.js
+./static/app.js.map
 
 # Go Binaries
-simple-notes-API
+./simple-notes-API

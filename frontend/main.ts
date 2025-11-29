@@ -3,6 +3,11 @@ window.addEventListener("DOMContentLoaded", () => {
   setupForm();
 });
 
+type NoteRequest = {
+	author: string;
+	text: string;
+}
+
 type Note = {
   id: number;
   author: string;
@@ -41,13 +46,13 @@ async function loadNotes(): Promise<void> {
   });
 }
 
-async function createNote(author: string, text: string): Promise<void> {
+async function createNote(noteReq: NoteRequest): Promise<void> {
   const response = await fetch("/notes", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ author, text }),
+    body: JSON.stringify(noteReq),
   });
 
   if (!response.ok) {
@@ -75,7 +80,7 @@ function setupForm(): void {
     const author = authorInput.value.trim();
     const text = textInput.value.trim();
 
-    await createNote(author, text);
+    await createNote({author: author, text: text});
 
     authorInput.value = "";
     textInput.value = "";
