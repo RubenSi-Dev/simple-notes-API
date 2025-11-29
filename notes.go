@@ -13,6 +13,7 @@ type Note struct{
 	ID 			int 		`json:"id"`
 	Author 	string	`json:"author"`
 	Text 		string	`json:"text"`
+	Edited  bool    `json:"edited"`
 }
 
 // NoteRequest - how new notes are requested
@@ -32,6 +33,7 @@ func (nr *NoteRequest) toNote(id int) (result *Note) {
 		ID: id,
 		Author: nr.Author,
 		Text: nr.Text,
+		Edited: false,
 	}
 }
 
@@ -77,6 +79,7 @@ func (n *Notes) updateById(id int, nur *NoteUpdateRequest) (*Note, error) {
 				ID: id,
 				Author: note.Author,
 				Text: nur.Text,
+				Edited: true,
 			}
 			n.Entries = append(append(n.Entries[:i], result), n.Entries[i+1:]...)
 			return result, nil
