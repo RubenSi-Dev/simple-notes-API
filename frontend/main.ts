@@ -12,6 +12,7 @@ type Note = {
   id: number;
   author: string;
   text: string;
+	edited: boolean;
 };
 
 async function loadNotes(): Promise<void> {
@@ -35,6 +36,9 @@ async function loadNotes(): Promise<void> {
 
     const textSpan = document.createElement("span");
     textSpan.textContent = `(${note.id}) ${note.author}:  ${note.text}			`;
+		if (note.edited) {
+			textSpan.textContent += '[edited]'
+		}
     const deleteButton = document.createElement("button");
     deleteButton.textContent = "Delete";
     deleteButton.addEventListener("click", async () => {

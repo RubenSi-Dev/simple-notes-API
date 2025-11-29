@@ -102,8 +102,8 @@ func handleNotes(w http.ResponseWriter, r *http.Request) {
 	case http.MethodDelete: // DELETE
 		handleNotesDelete(w, r)
 
-	case http.MethodPut: // PUT
-		handleNotesPut(w, r)	
+	case http.MethodPatch: // PATCH
+		handleNotesPatch(w, r)	
 
 	default:
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
@@ -169,8 +169,8 @@ func handleNotesDelete(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// handleNotesPut - handles PUT requests to /notes
-func handleNotesPut(w http.ResponseWriter, r *http.Request) {
+// handleNotesPatch - handles PATCH requests to /notes - changes the text only, not the author
+func handleNotesPatch(w http.ResponseWriter, r *http.Request) {
 	idStr := r.URL.Query().Get("id")
 	if idStr == "" {
 		http.Error(w, "missing id query parameter", http.StatusBadRequest)
