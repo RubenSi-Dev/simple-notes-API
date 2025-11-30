@@ -26,5 +26,5 @@
 ## ToDo
 - **Implement update note functionality (PUT /notes?id=)** [done]
 - **Improving and expanding frontend** [done]
-- Implement data persistence (SQLite) [done]
+- **Implement data persistence (SQLite)** [done]
 - Add user authentication
