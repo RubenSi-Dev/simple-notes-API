@@ -1,12 +1,13 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
 )
-
 
 // Note - how notes are saved in memory
 type Note struct{
@@ -37,57 +38,99 @@ func (nr *NoteRequest) toNote(id int) (result *Note) {
 	}
 }
 
-// Notes - datastructure that stores all notes
-type Notes struct{
-	Entries []*Note
-	NextID 	int
-}
-
-var notes = Notes{
-	Entries: []*Note{},
-	NextID: 0,
-}
-
 // addNote - add a new Note to the notes by passing a NoteRequest
-func (n *Notes) addNote(nr *NoteRequest) (result *Note) {
-	result = nr.toNote(n.NextID)
-	n.Entries = append(n.Entries, result)
-	n.NextID++
-	return 
-}
-
-
-// removeByID - removes note with specified ID if it is inside notes
-// returns the Note that was deleted
-func (n *Notes) removeByID(id int) (*Note, error) {
-	for i, note := range n.Entries {
-		if note.ID == id {
-			result := n.Entries[i]
-			n.Entries = append(n.Entries[:i], n.Entries[i+1:]...)
-			return result, nil
-		}
+func addNote(nr *NoteRequest) (*Note, error) {
+	res, err := db.Exec(
+		`INSERT INTO notes (author, text) VALUES (?, ?);`, 
+		nr.Author,
+		nr.Text,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("inserting %v in db not successful", nr)
 	}
-	return nil, fmt.Errorf("note of ID %v not found", id)
-}
 
-// updateById - given a NoteUpdateRequest and the corresponding ID, update the notes text
-// Returns the updated note as a Note if id was found
-func (n *Notes) updateById(id int, nur *NoteUpdateRequest) (*Note, error) {
-	for i, note := range n.Entries {
-		if note.ID == id {
-			result := &Note{
-				ID: id,
-				Author: note.Author,
-				Text: nur.Text,
-				Edited: true,
-			}
-			n.Entries = append(append(n.Entries[:i], result), n.Entries[i+1:]...)
-			return result, nil
-		}
+	id, err := res.LastInsertId()
+	if err != nil {
+		return nil, fmt.Errorf("inserting %v in db not successful", nr)
 	}
-	return nil, fmt.Errorf("note of ID %v not found", id)
+
+	return nr.toNote(int(id)), nil
 }
 
+func getNotes() ([]*Note, error) {
+	rows, err := db.Query(`SELECT id, author, text, edited FROM notes ORDER BY id;`)
+	defer rows.Close() 
+
+	if err != nil {
+		return nil, fmt.Errorf("couldn't read rows %w", err)
+	}
+
+	result := []*Note{}
+
+	for rows.Next() {
+		note := &Note{}
+		if err := rows.Scan(&note.ID, &note.Author, &note.Text, &note.Edited); err != nil {
+			return nil, fmt.Errorf("couldn't read all rows %w", err)
+		}
+		result = append(result, note)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("reading problem %w", err)
+	}
+
+	return result, nil
+}
+
+func getNoteByID(id int) (*Note, error) {
+	result := &Note{}
+	row := db.QueryRow(`SELECT id, author, text, edited FROM notes WHERE id=?`,id)
+	err := row.Scan(&result.ID, &result.Author, &result.Text, &result.Edited)
+
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, fmt.Errorf("note with id %v not found", id)
+	}
+
+	if err != nil {
+		return nil, fmt.Errorf("error reading note %w", err)
+	}
+	return result, nil
+}
+
+func removeNoteByID(id int) error {
+	res, err := db.Exec(
+		`DELETE FROM notes WHERE id=?`,
+		id,
+	)
+
+	if err != nil {  // check whether sql query was valid
+		return fmt.Errorf("SQL error %w", err)
+	}
+
+	affected, err := res.RowsAffected()
+
+	if affected == 0 || err != nil  {
+		return fmt.Errorf("invalid id %v", id)
+	}
+
+	return nil
+}
+
+
+func updateNoteByID(id int, nur *NoteUpdateRequest) error {
+	res, err := db.Exec(`UPDATE notes SET text = ?, updated = 1 WHERE id = ?`, nur.Text, id)
+	if err != nil {
+		return fmt.Errorf("SQL error %w", err)
+	}
+
+	affected, err := res.RowsAffected()
+
+	if affected == 0 || err != nil {
+		return fmt.Errorf("invalid id %v", id)
+	}
+
+	return nil
+}
 
 // handleNotes - main handler for /notes endpoint
 func handleNotes(w http.ResponseWriter, r *http.Request) {
@@ -114,8 +157,14 @@ func handleNotes(w http.ResponseWriter, r *http.Request) {
 // handleNotesGet - handles GET requests to /notes
 func handleNotesGet(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	errEnc := json.NewEncoder(w).Encode(notes.Entries)
-	if errEnc != nil {
+	notes, err := getNotes()
+	if err != nil {
+		http.Error(w, "Couldn't fetch notes from DB", http.StatusInternalServerError) 
+		return
+	}
+
+	err = json.NewEncoder(w).Encode(&notes)
+	if err != nil {
 		http.Error(w, "Couldn't encode notes", http.StatusInternalServerError)
 		return 
 	}
@@ -130,11 +179,16 @@ func handleNotesPost(w http.ResponseWriter, r *http.Request) {
 		return 
 	}
 
-	newNote := notes.addNote(&received)
+	newNote, err := addNote(&received)
+	if err != nil {
+		http.Error(w, "couldn't store locally", http.StatusInternalServerError)
+	}
+
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	errEnc := json.NewEncoder(w).Encode(newNote)
-	if errEnc != nil {
+	err = json.NewEncoder(w).Encode(newNote)
+	if err != nil {
 		http.Error(w, "couldn't encode new note", http.StatusInternalServerError)
 		return 
 	}
@@ -147,26 +201,22 @@ func handleNotesDelete(w http.ResponseWriter, r *http.Request) {
 	if idStr == "" {
 		http.Error(w, "missing id query parameter", http.StatusBadRequest)
 	}
-	id, errConv := strconv.Atoi(idStr)
+	id, err := strconv.Atoi(idStr)
 	
-	if errConv != nil {
+	if err != nil {
 		http.Error(w, "Bad format", http.StatusBadRequest)
 		return 
 	} 
-	deleted, errDel := notes.removeByID(id)
 
-	if errDel != nil {
+	err = removeNoteByID(id)
+
+	if err != nil {
 		http.Error(w, "No such ID", http.StatusNotFound)
 		return 
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusNoContent)
-	errEnc := json.NewEncoder(w).Encode(deleted)
-	if errEnc != nil {
-		http.Error(w, "Couldn't encode deleted note", http.StatusInternalServerError)	
-		return 
-	}
 }
 
 // handleNotesPatch - handles PATCH requests to /notes - changes the text only, not the author
@@ -176,32 +226,38 @@ func handleNotesPatch(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "missing id query parameter", http.StatusBadRequest)
 		return
 	}
-	id, errConv := strconv.Atoi(idStr)
+	id, err := strconv.Atoi(idStr)
 
-	if errConv != nil {
+	if err != nil {
 		http.Error(w, "Bad format", http.StatusBadRequest)
 		return 
 	}
 	
 	var received NoteUpdateRequest
-	errDec := json.NewDecoder(r.Body).Decode(&received)
-	if errDec != nil {
+	err = json.NewDecoder(r.Body).Decode(&received)
+	if err != nil {
 		http.Error(w, "Couldn't decode note", http.StatusBadRequest)
 		return 
 	}
 
-	updated, errUpd := notes.updateById(id, &received)
-
-	if errUpd != nil {
+	err = updateNoteByID(id, &received)
+	if err != nil {
 		http.Error(w, "No such ID", http.StatusNotFound)
 		return 
 	}
 
+	updated, err := getNoteByID(id)
+	if err != nil {
+		http.Error(w, "coudln't retrieve updated note", http.StatusNotFound)
+		return
+	}
+
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	errEnc := json.NewEncoder(w).Encode(updated)
-	if errEnc != nil {
-		http.Error(w, "Couldn't encode updated note", http.StatusInternalServerError)
+	err = json.NewEncoder(w).Encode(updated)
+	if err != nil {
+		http.Error(w, "couldn't encode updated note", http.StatusInternalServerError)
 		return 
 	}
 }

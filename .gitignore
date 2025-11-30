@@ -10,3 +10,6 @@ yarn-error.log
 
 # Go Binaries
 ./simple-notes-API
+
+# DB file
+./notes.db
