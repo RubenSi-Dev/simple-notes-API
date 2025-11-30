@@ -39,9 +39,18 @@ func main() {
 		panic(err)
 	}
 
+	_, err = db.Exec(
+		`CREATE TABLE IF NOT EXISTS users (
+			uid INTEGER PRIMARY KEY,
+			username TEXT NOT NULL UNIQUE,
+			password TEXT NOT NULL
+		);`,
+	)
+
 
 	http.HandleFunc("/healthz", handleHealth)
 	http.HandleFunc("/notes", handleNotes)
+	http.HandleFunc("/register", handleRegistrations)
 	fs := http.FileServer(http.Dir("./frontend-react/dist/"))
 	http.Handle("/", fs)
 
