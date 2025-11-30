@@ -28,10 +28,11 @@ export interface NoteItemProps {
 function App(): JSX.Element {
   const [notes, setNotes] = useState<Note[]>([]);
 
-	useEffect(() => {
-		fetch("/notes").then(res => res.json()).then(data => setNotes(data))
-	})
-
+  useEffect(() => {
+    fetch("/notes")
+      .then((res) => res.json())
+      .then((data) => setNotes(data));
+  });
 
   const handleNewNote = async (author: string, text: string): Promise<void> => {
     await fetch("/notes", {
@@ -46,42 +47,42 @@ function App(): JSX.Element {
     });
   };
 
-
   const handleDeleteNote = async (id: number): Promise<void> => {
-		await fetch("/notes?id=" + encodeURIComponent(id), {
-			method: "DELETE",
-		});
+    await fetch("/notes?id=" + encodeURIComponent(id), {
+      method: "DELETE",
+    });
   };
 
   const handleEditNote = async (id: number, text: string): Promise<void> => {
-		await fetch("/notes?id=" + encodeURIComponent(id), {
-			method: "PATCH",
+    await fetch("/notes?id=" + encodeURIComponent(id), {
+      method: "PATCH",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
         text: text,
       }),
-
-		})
+    });
   };
 
   return (
     <>
       <h1>Notes</h1>
-      <NoteForm onAddNote={handleNewNote} />
-      <ul className="note-list">
-        {notes.map((note) => {
-          return (
-            <NoteItem
-              key={note.id}
-              note={note}
-              onDeleteNote={handleDeleteNote}
-							onEdit={handleEditNote}
-            />
-          );
-        })}
-      </ul>
+      <div className="notes-layout">
+        <NoteForm onAddNote={handleNewNote} />
+        <ul className="note-list">
+          {notes.map((note) => {
+            return (
+              <NoteItem
+                key={note.id}
+                note={note}
+                onDeleteNote={handleDeleteNote}
+                onEdit={handleEditNote}
+              />
+            );
+          })}
+        </ul>
+      </div>
     </>
   );
 }
