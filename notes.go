@@ -130,7 +130,16 @@ func removeNoteByID(id int) error {
 }
 
 
-func updateNoteByID(id int, nur *NoteUpdateRequest) error {
+func updateNoteByID(id int, nur *NoteUpdateRequest) (error) {
+	oldNote, err := getNoteByID(id)
+	if err != nil {
+		return fmt.Errorf("note with id %v doesn't exist", id)
+	}
+
+	if oldNote.Text == nur.Text {
+		return fmt.Errorf("no change in update query")
+	}
+
 	res, err := db.Exec(`UPDATE notes SET text = ?, edited = 1 WHERE id = ?`, nur.Text, id)
 	if err != nil {
 		return fmt.Errorf("SQL error %w", err)
