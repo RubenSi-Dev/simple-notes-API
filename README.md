@@ -24,7 +24,7 @@
 - Using curl to test endpoints
 
 ## ToDo
-- Implement update note functionality (PUT /notes?id=)
-- Improving and expanding frontend
+- **Implement update note functionality (PUT /notes?id=)** [done]
+- **Improving and expanding frontend** [done]
 - Implement data persistence (SQLite)
 - Add user authentication
