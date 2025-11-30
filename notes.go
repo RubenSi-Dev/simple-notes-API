@@ -69,8 +69,15 @@ func getNotes() ([]*Note, error) {
 
 	for rows.Next() {
 		note := &Note{}
-		if err := rows.Scan(&note.ID, &note.Author, &note.Text, &note.Edited); err != nil {
+		var editedInt int;
+		if err := rows.Scan(&note.ID, &note.Author, &note.Text, &editedInt); err != nil {
 			return nil, fmt.Errorf("couldn't read all rows %w", err)
+		}
+
+		if editedInt == 1 {
+			note.Edited = true
+		}	else {
+			note.Edited = false
 		}
 		result = append(result, note)
 	}
@@ -84,11 +91,17 @@ func getNotes() ([]*Note, error) {
 
 func getNoteByID(id int) (*Note, error) {
 	result := &Note{}
-	row := db.QueryRow(`SELECT id, author, text, edited FROM notes WHERE id=?`,id)
-	err := row.Scan(&result.ID, &result.Author, &result.Text, &result.Edited)
-
+	row := db.QueryRow(`SELECT id, author, text, edited FROM notes WHERE id=?`, id)
+	var editedInt int;
+	err := row.Scan(&result.ID, &result.Author, &result.Text, &editedInt)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, fmt.Errorf("note with id %v not found", id)
+	}
+
+	if editedInt == 1 {
+		result.Edited = true
+	} else {
+		result.Edited = false
 	}
 
 	if err != nil {
@@ -118,7 +131,7 @@ func removeNoteByID(id int) error {
 
 
 func updateNoteByID(id int, nur *NoteUpdateRequest) error {
-	res, err := db.Exec(`UPDATE notes SET text = ?, updated = 1 WHERE id = ?`, nur.Text, id)
+	res, err := db.Exec(`UPDATE notes SET text = ?, edited = 1 WHERE id = ?`, nur.Text, id)
 	if err != nil {
 		return fmt.Errorf("SQL error %w", err)
 	}
