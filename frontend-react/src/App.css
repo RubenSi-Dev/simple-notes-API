@@ -1,0 +1,22 @@
+#root {
+	width: 100%;
+  margin: 0;
+  padding: 2rem;
+  text-align: left;
+}
+
+.note-edited {
+	color: #FFFF00;
+}
+
+.notes-layout {
+	display: flex;
+	align-items: flex-start;
+	gap: 16px;
+}
+
+.notes-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
