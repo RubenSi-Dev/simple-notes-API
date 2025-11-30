@@ -7,7 +7,7 @@ import (
 func main() {
 	http.HandleFunc("/healthz", handleHealth)
 	http.HandleFunc("/notes", handleNotes)
-	fs := http.FileServer(http.Dir("./static"))
+	fs := http.FileServer(http.Dir("./frontend-react/dist/"))
 	http.Handle("/", fs)
 
 	err := http.ListenAndServe(":8080", nil)
