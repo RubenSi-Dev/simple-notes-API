@@ -28,11 +28,13 @@ export interface NoteItemProps {
 function App(): JSX.Element {
   const [notes, setNotes] = useState<Note[]>([]);
 
-  useEffect(() => {
+  const fetchNotes = (): void => {
     fetch("/notes")
       .then((res) => res.json())
       .then((data) => setNotes(data));
-  });
+  };
+
+  useEffect(fetchNotes, []);
 
   const handleNewNote = async (author: string, text: string): Promise<void> => {
     await fetch("/notes", {
@@ -45,12 +47,14 @@ function App(): JSX.Element {
         text: text,
       }),
     });
+    fetchNotes();
   };
 
   const handleDeleteNote = async (id: number): Promise<void> => {
     await fetch("/notes?id=" + encodeURIComponent(id), {
       method: "DELETE",
     });
+    fetchNotes();
   };
 
   const handleEditNote = async (id: number, text: string): Promise<void> => {
@@ -63,6 +67,7 @@ function App(): JSX.Element {
         text: text,
       }),
     });
+    fetchNotes();
   };
 
   return (

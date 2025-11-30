@@ -16,8 +16,9 @@ export function NoteEditForm({
         value={text}
         onChange={(e) => setText(e.target.value)}
       />
-      <button
-        onClick={() => {
+      <button className="edit-buttons"
+        onClick={async () => {
+          if (!text) return;
           onEdit(note.id, text);
           setIsEditing(false);
         }}

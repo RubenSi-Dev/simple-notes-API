@@ -7,6 +7,11 @@
 
 .note-edited {
 	color: #FFFF00;
+	margin: 1;
+}
+
+.note-non-edited {
+	color: #00FF00;
 }
 
 .notes-layout {
@@ -15,8 +20,14 @@
 	gap: 16px;
 }
 
-.notes-list {
-	list-style: none;
-	margin: 0;
-	padding: 0;
+.note-list {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.note-item-buttons {
+	display: flex;
+	align-items: left;
+	gap: 10px;
 }
