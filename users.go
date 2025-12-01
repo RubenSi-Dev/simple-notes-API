@@ -50,7 +50,7 @@ func getUserByUsername(username string) (*User, error) {
 	row := db.QueryRow(`SELECT uid, username, password FROM users WHERE username=?`, username)
 
 	if err := row.Scan(&user.UID, &user.Username, &user.PasswordHashed); err != nil {
-		if errors.As(err, sql.ErrNoRows) {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, fmt.Errorf("user does not exist")
 		}
 		return nil, fmt.Errorf("database error during user retrieval: %w", err)
@@ -96,6 +96,7 @@ func handleLogins(w http.ResponseWriter, r *http.Request) {
 	case http.MethodPost:
 		var received AuthenticationRequest
 		err := json.NewDecoder(r.Body).Decode(&received)
+
 		if err != nil {
 			http.Error(w, "Couldn't deocode request", http.StatusBadRequest)
 			return 
@@ -116,7 +117,11 @@ func handleLogins(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-type", "application/json")
 		w.WriteHeader(http.StatusOK)
 
-		json.NewEncoder(w).Encode(user)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"message": "Succesfully logged in",
+			"username": user.Username,
+			"uid": user.UID,
+		})
 
 	default:
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
