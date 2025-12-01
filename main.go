@@ -51,6 +51,7 @@ func main() {
 	http.HandleFunc("/healthz", handleHealth)
 	http.HandleFunc("/notes", handleNotes)
 	http.HandleFunc("/register", handleRegistrations)
+	http.HandleFunc("/login", handleLogins)
 	fs := http.FileServer(http.Dir("./frontend-react/dist/"))
 	http.Handle("/", fs)
 
