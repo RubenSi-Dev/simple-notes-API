@@ -7,7 +7,15 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"github.com/golang-jwt/jwt/v5"
 )
+
+var jwtKey = []byte("placeholder_very_secret_key")
+
+type Claims struct {
+	UID 									int		`json:"uid"`
+	jwt.RegisteredClaims
+}
 
 // Note - how notes are saved in memory
 type Note struct{

@@ -6,7 +6,9 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"time"
 
+	"github.com/golang-jwt/jwt/v5"
 	sqlite3 "github.com/mattn/go-sqlite3"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -114,12 +116,29 @@ func handleLogins(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		// JWT be valid for 24h
+		expirationTime := time.Now().Add(24 * time.Hour) 
+		claims := &Claims{
+			UID: user.UID,
+			RegisteredClaims: jwt.RegisteredClaims{
+				ExpiresAt: jwt.NewNumericDate(expirationTime),
+			},
+		}
+
+		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+		tokenString, err := token.SignedString(jwtKey)
+		if err != nil {
+			http.Error(w, "couldn't generate token", http.StatusInternalServerError)
+			return
+		}
+
 		w.Header().Set("Content-type", "application/json")
 		w.WriteHeader(http.StatusOK)
 
-		json.NewEncoder(w).Encode(map[string]interface{}{
+		json.NewEncoder(w).Encode(map[string]any{
 			"message": "Succesfully logged in",
-			"username": user.Username,
+			"token": tokenString,
 			"uid": user.UID,
 		})
 
