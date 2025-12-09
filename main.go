@@ -49,11 +49,14 @@ func main() {
 
 
 	http.HandleFunc("/healthz", handleHealth)
-	http.HandleFunc("/notes", handleNotes)
 	http.HandleFunc("/register", handleRegistrations)
 	http.HandleFunc("/login", handleLogins)
+	http.HandleFunc("/notes", handleNotes)
+
+
 	fs := http.FileServer(http.Dir("./frontend-react/dist/"))
 	http.Handle("/", fs)
+
 
 	err = http.ListenAndServe(":8080", nil)
 

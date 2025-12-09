@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -67,11 +68,12 @@ func addNote(nr *NoteRequest) (*Note, error) {
 
 func getNotes() ([]*Note, error) {
 	rows, err := db.Query(`SELECT id, author, text, edited FROM notes ORDER BY id;`)
-	defer rows.Close() 
 
 	if err != nil {
 		return nil, fmt.Errorf("couldn't read rows %w", err)
 	}
+
+	defer rows.Close() 
 
 	result := []*Note{}
 

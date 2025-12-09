@@ -2,6 +2,7 @@ import { useEffect, useState, type JSX } from "react";
 import { NoteForm } from "./components/NoteForm.js";
 import { NoteItem } from "./components/NoteItem.js";
 import "./App.css";
+import { AuthenticationForm } from "./components/LoginForm.js";
 
 export interface Note {
   id: number;
@@ -23,6 +24,10 @@ export interface NoteItemProps {
   note: Note;
   onEdit: (id: number, text: string) => Promise<void>;
   onDeleteNote: (id: number) => Promise<void>;
+}
+
+export interface AuthFormProps {
+  onSubmit: (username: string, password: string, register?: boolean) => Promise<Response>;
 }
 
 function App(): JSX.Element {
@@ -65,6 +70,26 @@ function App(): JSX.Element {
     });
   };
 
+  const handleAuth = async (
+    username: string,
+    password: string,
+		register?: boolean,
+  ): Promise<Response> => {
+		let reg = "/login"
+		if (register) reg = "/register"
+
+    return await fetch(reg, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        username: username,
+        password: password,
+      }),
+    });
+  };
+
   return (
     <>
       <h1>Notes</h1>
@@ -83,6 +108,7 @@ function App(): JSX.Element {
           })}
         </ul>
       </div>
+      <AuthenticationForm onSubmit={handleAuth} />
     </>
   );
 }

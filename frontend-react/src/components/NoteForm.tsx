@@ -9,17 +9,20 @@ export function NoteForm({ onAddNote }: NoteFormProps): JSX.Element {
     <>
       <input
         type="text"
+				className="entry-fields"
         value={author}
         onChange={(e) => setAuthor(e.target.value)}
         placeholder="author"
       ></input>
       <input
         type="text"
+				className="entry-fields"
         value={text}
         onChange={(e) => setText(e.target.value)}
         placeholder="text"
       ></input>
       <button
+				className="buttons"	
         onClick={() => {
           onAddNote(author, text);
           setAuthor("");

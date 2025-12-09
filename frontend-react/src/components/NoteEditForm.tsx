@@ -12,6 +12,7 @@ export function NoteEditForm({
     <>
       <input
         type="text"
+				className="entry-fields"
         placeholder="text"
         value={text}
         onChange={(e) => setText(e.target.value)}

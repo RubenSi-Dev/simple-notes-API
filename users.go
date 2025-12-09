@@ -107,8 +107,11 @@ func handleLogins(w http.ResponseWriter, r *http.Request) {
 		user, err := getUserByUsername(received.Username)
 		if err != nil {
 			http.Error(w, "wrong credentials", http.StatusUnauthorized)
+			fmt.Println(err)
 			return
 		}
+
+		fmt.Println(user)
 
 		err = bcrypt.CompareHashAndPassword(user.PasswordHashed, []byte(received.Password))
 		if err != nil {
@@ -118,6 +121,7 @@ func handleLogins(w http.ResponseWriter, r *http.Request) {
 
 		// JWT be valid for 24h
 		expirationTime := time.Now().Add(24 * time.Hour) 
+
 		claims := &Claims{
 			UID: user.UID,
 			RegisteredClaims: jwt.RegisteredClaims{

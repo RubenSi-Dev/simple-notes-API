@@ -20,3 +20,50 @@
 	margin: 0;
 	padding: 0;
 }
+
+.login-fields {
+	margin-top: 0.25rem;	
+	width: 30%;
+	border-radius: 0.375rem;
+	border: 1px solid #D1D5DB;
+	box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+	padding: 0.5rem;
+	background-color: #1F2937;
+	color: #FFFFFF;
+}
+.registering-check {
+	margin-top: 1rem;
+	display: flex;
+	gap: 0.5rem;
+	height: 2.5rem;
+	color: #FFFFFF;
+}
+
+.entry-fields {
+	margin-top: 0.25rem;	
+	height: 1.5rem;
+	width: 20%;
+	border-radius: 0.375rem;
+	border: 1px solid #D1D5DB;
+	box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+	padding: 0.5rem;
+	background-color: #1F2937;
+	color: #FFFFFF;
+}
+
+.login-fields-div {
+	margin-bottom: 1rem;
+}
+
+.buttons-div {
+	margin-top: 1rem;
+	display: flex;
+	gap: 0.5rem;
+}
+
+.buttons {
+	margin-top: 1rem;
+	display: flex;
+	gap: 0.5rem;
+	height: 2.5rem;
+}
