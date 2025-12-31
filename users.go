@@ -119,32 +119,29 @@ func handleLogins(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// JWT be valid for 24h
-		expirationTime := time.Now().Add(24 * time.Hour) 
-
-		claims := &Claims{
-			UID: user.UID,
-			RegisteredClaims: jwt.RegisteredClaims{
-				ExpiresAt: jwt.NewNumericDate(expirationTime),
-			},
-		}
-
-		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
-		tokenString, err := token.SignedString(jwtKey)
+		token, err := generateToken()
 		if err != nil {
-			http.Error(w, "couldn't generate token", http.StatusInternalServerError)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
 
-		w.Header().Set("Content-type", "application/json")
-		w.WriteHeader(http.StatusOK)
+		expiresAt := time.Now().Add(24 * time.Hour)
+		sessionStore.mu.Lock()
+		sessionStore.sessions[token] = Session{
+			UserID: 	user.UID,
+			Expiry: 	expiresAt,
+		}
+		sessionStore.mu.Unlock()
 
-		json.NewEncoder(w).Encode(map[string]any{
-			"message": "Succesfully logged in",
-			"token": tokenString,
-			"uid": user.UID,
+		http.SetCookie(w, &http.Cookie{
+			Name: 			"session_token",
+			Value: 			token,
+			Expires: 		expiresAt,
+			HttpOnly: 	true,
+			Path: 			"/",
 		})
+
+		w.WriteHeader(http.StatusOK)
 
 	default:
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
