@@ -54,7 +54,11 @@ func addNote(nr *NoteRequest) (*Note, error) {
 		return nil, fmt.Errorf("inserting %v in db not successful", nr)
 	}
 
-	return nr.toNote(int(id)), nil
+	result := nr.toNote(int(id))
+	if verbose {
+		fmt.Printf("adding: %v\n", result)
+	}
+	return result, nil
 }
 
 func getNotes() ([]*Note, error) {
@@ -112,6 +116,15 @@ func getNoteByID(id int) (*Note, error) {
 }
 
 func removeNoteByID(id int) error {
+	var toBeDeleted *Note
+	if verbose {
+		var err error
+		toBeDeleted, err = getNoteByID(id)
+		if err != nil {
+			fmt.Printf("attempted to delete note with id: %v, but it doesn't exist\n", id)
+		}
+	}
+
 	res, err := db.Exec(
 		`DELETE FROM notes WHERE id=?`,
 		id,
@@ -125,6 +138,9 @@ func removeNoteByID(id int) error {
 
 	if affected == 0 || err != nil {
 		return fmt.Errorf("invalid id %v", id)
+	}
+	if verbose && toBeDeleted != nil {
+		fmt.Printf("deleted note: %v\n", toBeDeleted)
 	}
 
 	return nil
@@ -149,6 +165,10 @@ func updateNoteByID(id int, nur *NoteUpdateRequest) error {
 
 	if affected == 0 || err != nil {
 		return fmt.Errorf("invalid id %v", id)
+	}
+
+	if verbose {
+		fmt.Printf("updated note with id %v to say %v\n", id, nur.Text)
 	}
 
 	return nil
